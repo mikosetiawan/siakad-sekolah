@@ -5,14 +5,42 @@ namespace App\Http\Controllers;
 use App\Models\Grade;
 use App\Models\Student;
 use App\Models\Subject;
+use App\Models\ClassModel; // Adjust namespace according to your Class model
 use Illuminate\Http\Request;
 
 class GradeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $grades = Grade::with(['student', 'subject'])->get();
-        return view('grades.index', compact('grades'));
+        $query = Grade::with(['student.class', 'subject']);
+
+        if ($request->has('class_id') && !empty($request->class_id)) {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('class_id', $request->class_id);
+            });
+        }
+
+        if ($request->has('subject_id') && !empty($request->subject_id)) {
+            $query->where('subject_id', $request->subject_id);
+        }
+
+        if ($request->has('semester') && !empty($request->semester)) {
+            $query->where('semester', $request->semester);
+        }
+
+        if ($request->has('min_score') && is_numeric($request->min_score)) {
+            $query->where('score', '>=', $request->min_score);
+        }
+
+        if ($request->has('max_score') && is_numeric($request->max_score)) {
+            $query->where('score', '<=', $request->max_score);
+        }
+
+        $grades = $query->get();
+        $classes = ClassModel::all(); // Adjust according to your Class model name
+        $subjects = Subject::all();
+
+        return view('grades.index', compact('grades', 'classes', 'subjects'));
     }
 
     public function create()

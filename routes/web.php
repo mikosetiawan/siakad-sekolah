@@ -58,8 +58,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/schedules/{schedule}/students', [ScheduleController::class, 'getStudents'])->name('schedules.students');
     Route::get('/classes/{class}/students', [ClassController::class, 'getStudents'])->name('classes.students');
 
-
-
     // Report Routes
     Route::prefix('reports')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('reports.index');
